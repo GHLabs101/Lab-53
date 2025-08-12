@@ -1,0 +1,35 @@
+name: Lab 53 - Failing Demo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Print env and ref
+        run: |
+          echo "EVENT=${{ github.event_name }}"
+          echo "REF=${{ github.ref }}"
+
+      - name: Use a required secret (may be missing)
+        env:
+          MY_TOKEN: ${{ secrets.MY_TOKEN }}
+        run: |
+          if [ -z "$MY_TOKEN" ]; then
+            echo "Error: MY_TOKEN secret is missing"
+            exit 1
+          fi
+          echo "Token length: ${#MY_TOKEN}"
+
+      - name: Run a fragile command
+        run: |
+          set -e
+          echo "::group::Trying a command that might fail"
+          curl -sSf https://example.invalid/ || (echo "Network error"; exit 1)
+          echo "::endgroup::"
