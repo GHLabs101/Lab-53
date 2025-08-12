@@ -27,9 +27,14 @@ jobs:
           fi
           echo "Token length: ${#MY_TOKEN}"
 
-      - name: Run a fragile command
+      - name: Run a fragile command (tolerant)
         run: |
-          set -e
+          set +e
           echo "::group::Trying a command that might fail"
-          curl -sSf https://example.invalid/ || (echo "Network error"; exit 1)
+          curl -v https://example.invalid/
+          STATUS=$?
+          echo "curl exit code: $STATUS"
           echo "::endgroup::"
+          # Do not fail the job due to this external dependency
+          exit 0
+
